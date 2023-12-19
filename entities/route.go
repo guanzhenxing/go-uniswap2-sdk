@@ -2,15 +2,13 @@ package entities
 
 import (
 	"fmt"
-	"github.com/guanzhenxing/go-uniswap2-sdk/constants"
 )
 
 var (
-	ErrInvalidPairs         = fmt.Errorf("invalid pairs")
-	ErrInvalidPairsChainIDs = fmt.Errorf("invalid pairs chainIDs")
-	ErrInvalidInput         = fmt.Errorf("invalid token input")
-	ErrInvalidOutput        = fmt.Errorf("invalid token output")
-	ErrInvalidPath          = fmt.Errorf("invalid pairs for path")
+	ErrInvalidPairs  = fmt.Errorf("invalid pairs")
+	ErrInvalidInput  = fmt.Errorf("invalid token input")
+	ErrInvalidOutput = fmt.Errorf("invalid token output")
+	ErrInvalidPath   = fmt.Errorf("invalid pairs for path")
 )
 
 type Route struct {
@@ -24,12 +22,6 @@ type Route struct {
 func NewRoute(pairs []*Pair, input, output *Token) (*Route, error) {
 	if len(pairs) == 0 {
 		return nil, ErrInvalidPairs
-	}
-
-	for i := range pairs {
-		if pairs[i].ChainID() != pairs[0].ChainID() {
-			return nil, ErrInvalidPairsChainIDs
-		}
 	}
 
 	if !pairs[0].InvolvesToken(input) {
@@ -66,8 +58,4 @@ func NewRoute(pairs []*Pair, input, output *Token) (*Route, error) {
 	var err error
 	route.MidPrice, err = NewPriceFromRoute(route)
 	return route, err
-}
-
-func (r *Route) ChainID() constants.ChainID {
-	return r.Pairs[0].ChainID()
 }

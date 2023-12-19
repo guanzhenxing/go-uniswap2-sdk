@@ -3,7 +3,6 @@ package entities
 import (
 	"errors"
 	"github.com/guanzhenxing/go-uniswap2-sdk/constants"
-	"github.com/guanzhenxing/go-uniswap2-sdk/utils"
 	"math/big"
 )
 
@@ -23,9 +22,6 @@ type CurrencyAmount struct {
 // NewCurrencyAmount creates a CurrencyAmount
 // amount _must_ be raw, i.e. in the native representation
 func NewCurrencyAmount(currency *Currency, amount *big.Int) (*CurrencyAmount, error) {
-	if err := utils.ValidateSolidityTypeInstance(amount, constants.Uint256); err != nil {
-		return nil, err
-	}
 
 	fraction := NewFraction(amount, big.NewInt(0).Exp(constants.Ten, big.NewInt(int64(currency.Decimals)), nil))
 	return &CurrencyAmount{

@@ -2,7 +2,6 @@ package entities
 
 import (
 	"fmt"
-	"github.com/guanzhenxing/go-uniswap2-sdk/constants"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -11,7 +10,7 @@ import (
 var (
 	ErrDiffChainID = fmt.Errorf("diff chain id")
 	ErrDiffToken   = fmt.Errorf("diff token")
-	ErrSameAddrss  = fmt.Errorf("same address")
+	ErrSameAddr    = fmt.Errorf("same address")
 )
 
 /**
@@ -20,11 +19,10 @@ var (
 type Token struct {
 	*Currency
 
-	constants.ChainID
 	common.Address
 }
 
-func NewToken(chainID constants.ChainID, address common.Address, decimals int, symbol, name string) (*Token, error) {
+func NewToken(address common.Address, decimals int, symbol, name string) (*Token, error) {
 	currency, err := newCurrency(decimals, symbol, name)
 	if err != nil {
 		return nil, err
@@ -32,7 +30,6 @@ func NewToken(chainID constants.ChainID, address common.Address, decimals int, s
 
 	return &Token{
 		Currency: currency,
-		ChainID:  chainID,
 		Address:  address,
 	}, nil
 }
@@ -46,7 +43,7 @@ func (t *Token) Equals(other *Token) bool {
 		return true
 	}
 
-	return t.ChainID == other.ChainID && t.Address == other.Address
+	return t.Address == other.Address
 }
 
 /**
@@ -56,11 +53,9 @@ func (t *Token) Equals(other *Token) bool {
  * @throws if the tokens are on different chains
  */
 func (t *Token) SortsBefore(other *Token) (bool, error) {
-	if t.ChainID != other.ChainID {
-		return false, ErrDiffChainID
-	}
+
 	if t.Address == other.Address {
-		return false, ErrSameAddrss
+		return false, ErrSameAddr
 	}
 
 	return strings.ToLower(t.Address.String()) < strings.ToLower(other.Address.String()), nil

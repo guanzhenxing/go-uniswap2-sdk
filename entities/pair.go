@@ -2,20 +2,11 @@ package entities
 
 import (
 	"fmt"
-	"github.com/guanzhenxing/go-uniswap2-sdk/config"
 	"github.com/guanzhenxing/go-uniswap2-sdk/constants"
 	"math/big"
-	"sync"
-
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
 )
 
 var (
-	_PairAddressCache = &PairAddressCache{
-		lk:      new(sync.RWMutex),
-		address: make(map[common.Address]map[common.Address]common.Address, 16),
-	}
 
 	// ErrInvalidLiquidity invalid liquidity
 	ErrInvalidLiquidity = fmt.Errorf("invalid liquidity")
@@ -41,52 +32,8 @@ func NewTokenAmounts(tokenAmountA, tokenAmountB *TokenAmount) (TokenAmounts, err
 	return TokenAmounts{tokenAmountB, tokenAmountA}, nil
 }
 
-// PairAddressCache warps pair address cache
-type PairAddressCache struct {
-	lk *sync.RWMutex
-	// token0 address : token1 address : pair address
-	address map[common.Address]map[common.Address]common.Address
-}
-
-// GetAddress returns contract address
-// addressA < addressB
-func (p *PairAddressCache) GetAddress(addressA, addressB common.Address) common.Address {
-	p.lk.RLock()
-	pairAddresses, ok := p.address[addressA]
-	if !ok {
-		p.lk.RUnlock()
-		p.lk.Lock()
-		defer p.lk.Unlock()
-		addr := getCreate2Address(addressA, addressB)
-		p.address[addressA] = map[common.Address]common.Address{
-			addressB: addr,
-		}
-		return addr
-	}
-
-	pairAddress, ok := pairAddresses[addressB]
-	if !ok {
-		p.lk.RUnlock()
-		p.lk.Lock()
-		defer p.lk.Unlock()
-		addr := getCreate2Address(addressA, addressB)
-		pairAddresses[addressB] = addr
-		return addr
-	}
-
-	p.lk.RUnlock()
-	return pairAddress
-}
-
-func getCreate2Address(addressA, addressB common.Address) common.Address {
-	var salt [32]byte
-	copy(salt[:], crypto.Keccak256(append(addressA.Bytes(), addressB.Bytes()...)))
-	return crypto.CreateAddress2(config.Conf.FactoryAddress, salt, config.Conf.InitCodeHash)
-}
-
 // Pair warps uniswap pair
 type Pair struct {
-	LiquidityToken *Token
 	// sorted tokens
 	TokenAmounts
 }
@@ -101,14 +48,8 @@ func NewPair(tokenAmountA, tokenAmountB *TokenAmount) (*Pair, error) {
 	pair := &Pair{
 		TokenAmounts: tokenAmounts,
 	}
-	pair.LiquidityToken, err = NewToken(tokenAmountA.Token.ChainID, pair.GetAddress(),
-		config.Conf.TokenDecimals, config.Conf.Univ2Symbol, config.Conf.Univ2Name)
-	return pair, err
-}
 
-// GetAddress returns a contract's address for a pair
-func (p *Pair) GetAddress() common.Address {
-	return _PairAddressCache.GetAddress(p.TokenAmounts[0].Token.Address, p.TokenAmounts[1].Token.Address)
+	return pair, err
 }
 
 // InvolvesToken Returns true if the token is either token0 or token1
@@ -138,11 +79,6 @@ func (p *Pair) PriceOf(token *Token) (*Price, error) {
 		return p.Token0Price(), nil
 	}
 	return p.Token1Price(), nil
-}
-
-// ChainID Returns the chain ID of the tokens in the pair.
-func (p *Pair) ChainID() constants.ChainID {
-	return p.Token0().ChainID
 }
 
 // Token0 returns the first token in the pair
@@ -276,95 +212,4 @@ func (p *Pair) GetInputAmount(outputAmount *TokenAmount) (*TokenAmount, *Pair, e
 		return nil, nil, err
 	}
 	return inputAmount, pair, nil
-}
-
-// GetLiquidityMinted returns liquidity minted TokenAmount
-func (p *Pair) GetLiquidityMinted(totalSupply, tokenAmountA, tokenAmountB *TokenAmount) (*TokenAmount, error) {
-	if !p.LiquidityToken.Equals(totalSupply.Token) {
-		return nil, ErrDiffToken
-	}
-
-	tokenAmounts, err := NewTokenAmounts(tokenAmountA, tokenAmountB)
-	if err != nil {
-		return nil, err
-	}
-	if !(tokenAmounts[0].Token.Equals(p.Token0()) && tokenAmounts[1].Token.Equals(p.Token1())) {
-		return nil, ErrDiffToken
-	}
-
-	var liquidity *big.Int
-	if totalSupply.Raw().Cmp(constants.Zero) == 0 {
-		liquidity = big.NewInt(0).Mul(tokenAmounts[0].Raw(), tokenAmounts[1].Raw())
-		liquidity.Sqrt(liquidity)
-		liquidity.Sub(liquidity, constants.MinimumLiquidity)
-	} else {
-		amount0 := big.NewInt(0).Mul(tokenAmounts[0].Raw(), totalSupply.Raw())
-		amount0.Div(amount0, p.Reserve0().Raw())
-		amount1 := big.NewInt(0).Mul(tokenAmounts[1].Raw(), totalSupply.Raw())
-		amount1.Div(amount1, p.Reserve1().Raw())
-		liquidity = amount0
-		if liquidity.Cmp(amount1) > 0 {
-			liquidity = amount1
-		}
-	}
-
-	if liquidity.Cmp(constants.Zero) <= 0 {
-		return nil, ErrInsufficientInputAmount
-	}
-
-	return NewTokenAmount(p.LiquidityToken, liquidity)
-}
-
-// GetLiquidityValue returns liquidity value TokenAmount
-func (p *Pair) GetLiquidityValue(token *Token, totalSupply, liquidity *TokenAmount, feeOn bool, kLast *big.Int) (*TokenAmount, error) {
-	if !p.InvolvesToken(token) || !p.LiquidityToken.Equals(totalSupply.Token) || !p.LiquidityToken.Equals(liquidity.Token) {
-		return nil, ErrDiffToken
-	}
-	if liquidity.Raw().Cmp(totalSupply.Raw()) > 0 {
-		return nil, ErrInvalidLiquidity
-	}
-
-	totalSupplyAdjusted, err := p.adjustTotalSupply(totalSupply, feeOn, kLast)
-	if err != nil {
-		return nil, err
-	}
-
-	tokenAmount, err := p.ReserveOf(token)
-	if err != nil {
-		return nil, err
-	}
-
-	amount := big.NewInt(0).Mul(liquidity.Raw(), tokenAmount.Raw())
-	amount.Div(amount, totalSupplyAdjusted.Raw())
-	return NewTokenAmount(token, amount)
-}
-
-func (p *Pair) adjustTotalSupply(totalSupply *TokenAmount, feeOn bool, kLast *big.Int) (*TokenAmount, error) {
-	if !feeOn {
-		return totalSupply, nil
-	}
-
-	if kLast == nil {
-		return nil, ErrInvalidKLast
-	}
-	if kLast.Cmp(constants.Zero) == 0 {
-		return totalSupply, nil
-	}
-
-	rootK := big.NewInt(0).Mul(p.Reserve0().Raw(), p.Reserve1().Raw())
-	rootK.Sqrt(rootK)
-	rootKLast := big.NewInt(0).Sqrt(kLast)
-	if rootK.Cmp(rootKLast) <= 0 {
-		return totalSupply, nil
-	}
-
-	numerator := big.NewInt(0).Sub(rootK, rootKLast)
-	numerator.Mul(numerator, totalSupply.Raw())
-	denominator := big.NewInt(0).Mul(rootK, constants.Five)
-	denominator.Add(denominator, rootKLast)
-	tokenAmount, err := NewTokenAmount(p.LiquidityToken, numerator.Div(numerator, denominator))
-	if err != nil {
-		return nil, err
-	}
-	return totalSupply.Add(tokenAmount)
 }

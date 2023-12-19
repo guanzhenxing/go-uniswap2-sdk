@@ -2,16 +2,13 @@ package entities
 
 import (
 	"fmt"
-	"github.com/guanzhenxing/go-uniswap2-sdk/constants"
-	"github.com/guanzhenxing/go-uniswap2-sdk/utils"
-	"math/big"
 )
 
 /**
  * The only instance of the base class `Currency`.
  */
 var (
-	ETHER, _ = newCurrency(constants.Decimals18, "ETH", "Ether")
+	ETHER, _ = newCurrency(18, "ETH", "Ether")
 )
 
 var (
@@ -33,9 +30,6 @@ type Currency struct {
  * @param name of the currency
  */
 func newCurrency(decimals int, symbol, name string) (*Currency, error) {
-	if err := utils.ValidateSolidityTypeInstance(big.NewInt(int64(decimals)), constants.Uint8); err != nil {
-		return nil, err
-	}
 
 	return &Currency{
 		Decimals: decimals,
