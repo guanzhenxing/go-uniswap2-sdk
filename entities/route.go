@@ -2,8 +2,7 @@ package entities
 
 import (
 	"fmt"
-
-	"github.com/miraclesu/uniswap-sdk-go/constants"
+	"github.com/guanzhenxing/go-uniswap2-sdk/constants"
 )
 
 var (

@@ -3,7 +3,6 @@ package constants
 import (
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
 )
 
@@ -28,12 +27,6 @@ func (r Rounding) Valid() bool {
 		r == RoundHalfUp ||
 		r == RoundUp
 }
-
-const (
-	Decimals18  = 18
-	Univ2Symbol = "UNI-V2"
-	Univ2Name   = "Uniswap V2"
-)
 
 var (
 	MinimumLiquidity = big.NewInt(1000)
@@ -64,7 +57,14 @@ var (
 	}
 )
 
-var (
-	FactoryAddress = common.HexToAddress("0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f")
-	InitCodeHash   = common.FromHex("0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f")
+const (
+	Decimals18 = 18
+	//	Univ2Symbol = "UNI-V2"
+	//	Univ2Name   = "Uniswap V2"
 )
+
+//
+//var (
+//	FactoryAddress = common.HexToAddress("0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f")
+//	InitCodeHash   = common.FromHex("0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f")
+//)

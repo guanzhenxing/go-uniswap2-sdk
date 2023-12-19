@@ -2,13 +2,13 @@ package entities
 
 import (
 	"fmt"
+	"github.com/guanzhenxing/go-uniswap2-sdk/config"
+	"github.com/guanzhenxing/go-uniswap2-sdk/constants"
 	"math/big"
 	"sync"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-
-	"github.com/miraclesu/uniswap-sdk-go/constants"
 )
 
 var (
@@ -81,7 +81,7 @@ func (p *PairAddressCache) GetAddress(addressA, addressB common.Address) common.
 func getCreate2Address(addressA, addressB common.Address) common.Address {
 	var salt [32]byte
 	copy(salt[:], crypto.Keccak256(append(addressA.Bytes(), addressB.Bytes()...)))
-	return crypto.CreateAddress2(constants.FactoryAddress, salt, constants.InitCodeHash)
+	return crypto.CreateAddress2(config.Conf.FactoryAddress, salt, config.Conf.InitCodeHash)
 }
 
 // Pair warps uniswap pair
@@ -102,7 +102,7 @@ func NewPair(tokenAmountA, tokenAmountB *TokenAmount) (*Pair, error) {
 		TokenAmounts: tokenAmounts,
 	}
 	pair.LiquidityToken, err = NewToken(tokenAmountA.Token.ChainID, pair.GetAddress(),
-		constants.Decimals18, constants.Univ2Symbol, constants.Univ2Name)
+		config.Conf.TokenDecimals, config.Conf.Univ2Symbol, config.Conf.Univ2Name)
 	return pair, err
 }
 

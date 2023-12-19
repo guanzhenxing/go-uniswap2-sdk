@@ -1,10 +1,9 @@
 package utils
 
 import (
+	"github.com/guanzhenxing/go-uniswap2-sdk/constants"
 	"math/big"
 	"testing"
-
-	"github.com/miraclesu/uniswap-sdk-go/constants"
 )
 
 func TestValidateAndParseAddress(t *testing.T) {

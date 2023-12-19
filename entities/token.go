@@ -2,48 +2,16 @@ package entities
 
 import (
 	"fmt"
+	"github.com/guanzhenxing/go-uniswap2-sdk/constants"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
-
-	"github.com/miraclesu/uniswap-sdk-go/constants"
-	"github.com/miraclesu/uniswap-sdk-go/utils"
 )
 
 var (
 	ErrDiffChainID = fmt.Errorf("diff chain id")
 	ErrDiffToken   = fmt.Errorf("diff token")
 	ErrSameAddrss  = fmt.Errorf("same address")
-
-	_WETHCurrency, _ = newCurrency(constants.Decimals18, "WETH", "Wrapped Ether")
-
-	WETH = map[constants.ChainID]*Token{
-		constants.Mainnet: {
-			Currency: _WETHCurrency,
-			ChainID:  constants.Mainnet,
-			Address:  utils.ValidateAndParseAddress("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"),
-		},
-		constants.Ropsten: {
-			Currency: _WETHCurrency,
-			ChainID:  constants.Ropsten,
-			Address:  utils.ValidateAndParseAddress("0xc778417E063141139Fce010982780140Aa0cD5Ab"),
-		},
-		constants.Rinkeby: {
-			Currency: _WETHCurrency,
-			ChainID:  constants.Rinkeby,
-			Address:  utils.ValidateAndParseAddress("0xc778417E063141139Fce010982780140Aa0cD5Ab"),
-		},
-		constants.Goerli: {
-			Currency: _WETHCurrency,
-			ChainID:  constants.Goerli,
-			Address:  utils.ValidateAndParseAddress("0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6"),
-		},
-		constants.Kovan: {
-			Currency: _WETHCurrency,
-			ChainID:  constants.Kovan,
-			Address:  utils.ValidateAndParseAddress("0xd0A1E359811322d97991E03f863a0C30C2cF029C"),
-		},
-	}
 )
 
 /**
@@ -96,13 +64,4 @@ func (t *Token) SortsBefore(other *Token) (bool, error) {
 	}
 
 	return strings.ToLower(t.Address.String()) < strings.ToLower(other.Address.String()), nil
-}
-
-// NewETHRToken creates a token that currency is ETH
-func NewETHRToken(chainID constants.ChainID, address common.Address) *Token {
-	return &Token{
-		Currency: ETHER,
-		ChainID:  chainID,
-		Address:  address,
-	}
 }

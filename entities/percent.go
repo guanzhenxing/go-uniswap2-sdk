@@ -1,10 +1,9 @@
 package entities
 
 import (
+	"github.com/guanzhenxing/go-uniswap2-sdk/constants"
+	"github.com/guanzhenxing/go-uniswap2-sdk/number"
 	"math/big"
-
-	"github.com/miraclesu/uniswap-sdk-go/constants"
-	"github.com/miraclesu/uniswap-sdk-go/number"
 )
 
 var (

@@ -1,11 +1,10 @@
 package number
 
 import (
+	"github.com/guanzhenxing/go-uniswap2-sdk/constants"
 	"testing"
 
 	"github.com/shopspring/decimal"
-
-	"github.com/miraclesu/uniswap-sdk-go/constants"
 )
 
 func mustNewFromString(s string) decimal.Decimal {

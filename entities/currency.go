@@ -2,10 +2,9 @@ package entities
 
 import (
 	"fmt"
+	"github.com/guanzhenxing/go-uniswap2-sdk/constants"
+	"github.com/guanzhenxing/go-uniswap2-sdk/utils"
 	"math/big"
-
-	"github.com/miraclesu/uniswap-sdk-go/constants"
-	"github.com/miraclesu/uniswap-sdk-go/utils"
 )
 
 /**

@@ -1,13 +1,12 @@
 package entities
 
 import (
+	"github.com/guanzhenxing/go-uniswap2-sdk/constants"
+	"github.com/guanzhenxing/go-uniswap2-sdk/number"
 	"math/big"
 	"strings"
 
 	"github.com/shopspring/decimal"
-
-	"github.com/miraclesu/uniswap-sdk-go/constants"
-	"github.com/miraclesu/uniswap-sdk-go/number"
 )
 
 // ZeroFraction zero fraction instance

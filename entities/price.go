@@ -1,12 +1,11 @@
 package entities
 
 import (
+	"github.com/guanzhenxing/go-uniswap2-sdk/constants"
+	"github.com/guanzhenxing/go-uniswap2-sdk/number"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common/math"
-
-	"github.com/miraclesu/uniswap-sdk-go/constants"
-	"github.com/miraclesu/uniswap-sdk-go/number"
 )
 
 type Price struct {

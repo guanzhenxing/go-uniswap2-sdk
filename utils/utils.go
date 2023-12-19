@@ -2,11 +2,11 @@ package utils
 
 import (
 	"fmt"
+	"github.com/guanzhenxing/go-uniswap2-sdk/constants"
+
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
-
-	"github.com/miraclesu/uniswap-sdk-go/constants"
 )
 
 // ValidateSolidityTypeInstance determines if a value is a legal SolidityType
